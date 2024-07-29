@@ -1,0 +1,532 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.8/build/css/intlTelInput.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .top-bar {
+            background-color: #fff;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .top-bar .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin-right: 20px;
+        }
+        table {
+            width: 100%;
+        }
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-hold {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-none {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .notification {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .notification.success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .notification.error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <main role="main" class="col-md-12 px-4">
+                <div class="top-bar">
+                    <button class="btn btn-success" data-toggle="modal" data-target="#addSaleModal">Add Sale</button>
+                    <button class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
+                    <div class="search-bar">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by Invoice ID, Customer, Phone Number">
+                    </div>
+                </div>
+
+                <h2 class="mt-4">Sales Information</h2>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col"><input type="checkbox" id="selectAll"></th>
+                                <th scope="col">Invoice ID</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Time</th>
+                                <th scope="col">Customer</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Paid Amount</th>
+                                <th scope="col">Phone Number</th>
+                                <th scope="col">Sit Number</th>
+                                <th scope="col">Go to</th>
+                                <th scope="col">From to</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody">
+                            <!-- Rows will be added here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Notification Area -->
+                <div id="notification" class="notification"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Sales Entry -->
+    <div class="modal fade" id="addSaleModal" tabindex="-1" aria-labelledby="addSaleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSaleModalLabel">Add New Sale</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addSaleForm">
+                        <div class="form-group">
+                            <label for="invoiceId">Invoice ID</label>
+                            <input type="text" class="form-control" id="invoiceId" placeholder="Invoice ID" required readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" class="form-control" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="time">Time</label>
+                            <div class="d-flex">
+                                <input type="time" class="form-control" id="time" required>
+                                <select class="form-control ml-2" id="timePeriod" required>
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer">Customer</label>
+                            <input type="text" class="form-control" id="customer" placeholder="Enter Customer Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select class="form-control" id="status" required>
+                                <option value="Paid">Paid</option>
+                                <option value="Hold">Hold</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="paidAmount">Paid Amount</label>
+                            <input type="number" class="form-control" id="paidAmount" placeholder="Enter Paid Amount" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number</label>
+                            <input type="tel" class="form-control" id="phoneNumber" placeholder="Enter Phone Number" required>
+                            <small class="form-text text-muted">Please enter the phone number including country code.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="sitNumber">Sit Number</label>
+                            <input type="number" class="form-control" id="sitNumber" placeholder="Enter Sit Number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="goTo">Go to</label>
+                            <select class="form-control" id="goTo" required>
+                                <option value="Krong Siem Reap">Krong Siem Reap</option>
+                                <option value="Phnom Penh">Phnom Penh</option>
+                                <option value="Sihanoukville">Sihanoukville</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fromTo">From to</label>
+                            <select class="form-control" id="fromTo" required>
+                                <option value="Krong Siem Reap">Krong Siem Reap</option>
+                                <option value="Phnom Penh">Phnom Penh</option>
+                                <option value="Sihanoukville">Sihanoukville</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Editing Sales Entry -->
+    <div class="modal fade" id="editSaleModal" tabindex="-1" aria-labelledby="editSaleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editSaleModalLabel">Edit Sale</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editSaleForm">
+                        <input type="hidden" id="editSaleId">
+                        <div class="form-group">
+                            <label for="editDate">Date</label>
+                            <input type="date" class="form-control" id="editDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTime">Time</label>
+                            <div class="d-flex">
+                                <input type="time" class="form-control" id="editTime" required>
+                                <select class="form-control ml-2" id="editTimePeriod" required>
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editCustomer">Customer</label>
+                            <input type="text" class="form-control" id="editCustomer" placeholder="Enter Customer Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editStatus">Status</label>
+                            <select class="form-control" id="editStatus" required>
+                                <option value="Paid">Paid</option>
+                                <option value="Hold">Hold</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editPaidAmount">Paid Amount</label>
+                            <input type="number" class="form-control" id="editPaidAmount" placeholder="Enter Paid Amount" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editPhoneNumber">Phone Number</label>
+                            <input type="tel" class="form-control" id="editPhoneNumber" placeholder="Enter Phone Number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editSitNumber">Sit Number</label>
+                            <input type="number" class="form-control" id="editSitNumber" placeholder="Enter Sit Number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editGoTo">Go to</label>
+                            <select class="form-control" id="editGoTo" required>
+                                <option value="Krong Siem Reap">Krong Siem Reap</option>
+                                <option value="Phnom Penh">Phnom Penh</option>
+                                <option value="Sihanoukville">Sihanoukville</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editFromTo">From to</label>
+                            <select class="form-control" id="editFromTo" required>
+                                <option value="Krong Siem Reap">Krong Siem Reap</option>
+                                <option value="Phnom Penh">Phnom Penh</option>
+                                <option value="Sihanoukville">Sihanoukville</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Deleting Sales Entry -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="deleteConfirmationMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Confirm Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.8/build/js/intlTelInput.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = { 
+                    apiKey: "AIzaSyDNmEa2hy8zKxk_pDHoZBZ00iL2TDc64TQ", 
+                    authDomain: "travel-72e79.firebaseapp.com", 
+                    projectId: "travel-72e79", 
+                    storageBucket: "travel-72e79.appspot.com", 
+                    messagingSenderId: "3188908351", 
+                    appId: "1:3188908351:web:bf6e59231e26209735338a" 
+                };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Initialize intl-tel-input
+        const input = document.querySelector("#phoneNumber");
+        const iti = window.intlTelInput(input, {
+            preferredCountries: ["us", "gb", "ca"],
+            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.8/build/js/utils.js"
+        });
+
+        // Initialize intl-tel-input for edit form
+        const editInput = document.querySelector("#editPhoneNumber");
+        const editIti = window.intlTelInput(editInput, {
+            preferredCountries: ["us", "gb", "ca"],
+            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.8/build/js/utils.js"
+        });
+
+        // Function to generate a unique invoice ID
+        function generateInvoiceId() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 16; i++) {
+                const randomIndex = Math.floor(Math.random() * characters.length);
+                result += characters[randomIndex];
+            }
+            return result;
+        }
+
+        // Set the generated Invoice ID in the input field
+        document.getElementById('invoiceId').value = generateInvoiceId();
+
+        // Add Sale Form Submit Handler
+        document.getElementById('addSaleForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const invoiceId = document.getElementById('invoiceId').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value + ' ' + document.getElementById('timePeriod').value;
+            const customer = document.getElementById('customer').value;
+            const status = document.getElementById('status').value;
+            const paidAmount = document.getElementById('paidAmount').value;
+            const phoneNumber = iti.getNumber();
+            const sitNumber = document.getElementById('sitNumber').value;
+            const goTo = document.getElementById('goTo').value;
+            const fromTo = document.getElementById('fromTo').value;
+
+            db.collection('sales').add({
+                invoiceId: invoiceId,
+                date: date,
+                time: time,
+                customer: customer,
+                status: status,
+                paidAmount: parseFloat(paidAmount),
+                phoneNumber: phoneNumber,
+                sitNumber: parseInt(sitNumber),
+                goTo: goTo,
+                fromTo: fromTo,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                // Clear the form fields
+                document.getElementById('addSaleForm').reset();
+                document.getElementById('invoiceId').value = generateInvoiceId(); // Reset Invoice ID
+
+                // Hide the modal
+                $('#addSaleModal').modal('hide');
+
+                // Refresh the sales table
+                loadSales();
+
+                // Show success notification
+                showNotification('success', 'Sale added successfully.');
+            }).catch(error => {
+                console.error('Error adding sale: ', error);
+                showNotification('error', 'Failed to add sale. Please try again.');
+            });
+        });
+
+        // Edit Button Click Handler
+        function editSale(docId) {
+            db.collection('sales').doc(docId).get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('editSaleId').value = docId;
+                    document.getElementById('editDate').value = data.date;
+                    document.getElementById('editTime').value = data.time.split(' ')[0];
+                    document.getElementById('editTimePeriod').value = data.time.split(' ')[1];
+                    document.getElementById('editCustomer').value = data.customer;
+                    document.getElementById('editStatus').value = data.status;
+                    document.getElementById('editPaidAmount').value = data.paidAmount;
+                    editIti.setNumber(data.phoneNumber);
+                    document.getElementById('editSitNumber').value = data.sitNumber;
+                    document.getElementById('editGoTo').value = data.goTo;
+                    document.getElementById('editFromTo').value = data.fromTo;
+
+                    $('#editSaleModal').modal('show');
+                } else {
+                    console.error('No such document!');
+                }
+            }).catch(error => {
+                console.error('Error getting document: ', error);
+            });
+        }
+
+        // Edit Sale Form Submit Handler
+        document.getElementById('editSaleForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const docId = document.getElementById('editSaleId').value;
+            const date = document.getElementById('editDate').value;
+            const time = document.getElementById('editTime').value + ' ' + document.getElementById('editTimePeriod').value;
+            const customer = document.getElementById('editCustomer').value;
+            const status = document.getElementById('editStatus').value;
+            const paidAmount = document.getElementById('editPaidAmount').value;
+            const phoneNumber = editIti.getNumber();
+            const sitNumber = document.getElementById('editSitNumber').value;
+            const goTo = document.getElementById('editGoTo').value;
+            const fromTo = document.getElementById('editFromTo').value;
+
+            db.collection('sales').doc(docId).update({
+                date: date,
+                time: time,
+                customer: customer,
+                status: status,
+                paidAmount: parseFloat(paidAmount),
+                phoneNumber: phoneNumber,
+                sitNumber: parseInt(sitNumber),
+                goTo: goTo,
+                fromTo: fromTo,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                // Hide the modal
+                $('#editSaleModal').modal('hide');
+
+                // Refresh the sales table
+                loadSales();
+
+                // Show success notification
+                showNotification('success', 'Sale updated successfully.');
+            }).catch(error => {
+                console.error('Error updating sale: ', error);
+                showNotification('error', 'Failed to update sale. Please try again.');
+            });
+        });
+
+        // Delete Selected Button Click Handler
+        document.getElementById('deleteSelectedBtn').addEventListener('click', function () {
+            const selectedIds = Array.from(document.querySelectorAll('input[name="selectRow"]:checked')).map(checkbox => checkbox.value);
+            if (selectedIds.length > 0) {
+                document.getElementById('deleteConfirmationMessage').textContent = `Are you sure you want to delete ${selectedIds.length} selected sales?`;
+                $('#deleteConfirmationModal').modal('show');
+
+                document.getElementById('confirmDeleteBtn').onclick = function () {
+                    selectedIds.forEach(id => {
+                        db.collection('sales').doc(id).delete().catch(error => {
+                            console.error('Error deleting sale: ', error);
+                        });
+                    });
+
+                    // Hide the modal
+                    $('#deleteConfirmationModal').modal('hide');
+
+                    // Refresh the sales table
+                    loadSales();
+
+                    // Show success notification
+                    showNotification('success', 'Selected sales deleted successfully.');
+                };
+            } else {
+                showNotification('error', 'No sales selected for deletion.');
+            }
+        });
+
+        // Load Sales Data from Firestore
+        function loadSales() {
+            db.collection('sales').orderBy('timestamp', 'desc').get().then(snapshot => {
+                const tableBody = document.getElementById('salesTableBody');
+                tableBody.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><input type="checkbox" name="selectRow" value="${doc.id}"></td>
+                        <td>${data.invoiceId}</td>
+                        <td>${data.date}</td>
+                        <td>${data.time}</td>
+                        <td>${data.customer}</td>
+                        <td class="status-${data.status.toLowerCase()}">${data.status}</td>
+                        <td>${data.paidAmount.toFixed(2)}</td>
+                        <td>${data.phoneNumber}</td>
+                        <td>${data.sitNumber}</td>
+                        <td>${data.goTo}</td>
+                        <td>${data.fromTo}</td>
+                        <td><button class="btn btn-info btn-sm" onclick="editSale('${doc.id}')">Edit</button></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }).catch(error => {
+                console.error('Error loading sales: ', error);
+            });
+        }
+
+        // Filter Sales Data
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            Array.from(document.querySelectorAll('#salesTableBody tr')).forEach(row => {
+                const invoiceId = row.children[1].textContent.toLowerCase();
+                const customer = row.children[4].textContent.toLowerCase();
+                const phoneNumber = row.children[7].textContent.toLowerCase();
+                if (invoiceId.includes(searchTerm) || customer.includes(searchTerm) || phoneNumber.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Show Notification
+        function showNotification(type, message) {
+            const notification = document.getElementById('notification');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Load sales data initially
+        loadSales();
+    </script>
+</body>
+</html>

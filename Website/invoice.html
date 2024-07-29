@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <!-- Link to Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            max-width: 800px;
+            margin: auto;
+        }
+        .invoice-header, .invoice-footer {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .invoice-header h1 {
+            margin: 0;
+        }
+        .invoice-details, .invoice-items {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .invoice-details th, .invoice-items th, .invoice-details td, .invoice-items td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .invoice-details th, .invoice-items th {
+            background-color: #f4f4f4;
+        }
+        .invoice-items {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-header">
+        <h1>Invoice</h1>
+        <p>Company Name</p>
+        <p>Company Address</p>
+    </div>
+    <div class="invoice-details">
+        <table>
+            <tr>
+                <th>Invoice ID</th>
+                <td id="invoiceId"></td>
+            </tr>
+            <tr>
+                <th>Date</th>
+                <td id="date"></td>
+            </tr>
+            <tr>
+                <th>Time</th>
+                <td id="time"></td>
+            </tr>
+            <tr>
+                <th>Customer</th>
+                <td id="customer"></td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td id="status"></td>
+            </tr>
+            <tr>
+                <th>Paid Amount</th>
+                <td id="paidAmount"></td>
+            </tr>
+            <tr>
+                <th>Phone Number</th>
+                <td id="phoneNumber"></td>
+            </tr>
+            <tr>
+                <th>Sit Number</th>
+                <td id="sitNumber"></td>
+            </tr>
+            <tr>
+                <th>Go To</th>
+                <td id="goTo"></td>
+            </tr>
+            <tr>
+                <th>From To</th>
+                <td id="fromTo"></td>
+            </tr>
+        </table>
+    </div>
+    <div class="invoice-footer">
+        <button onclick="window.print()">Print Invoice</button>
+    </div>
+    <script>
+        // Retrieve invoice details from URL parameters and set them in the document
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                invoiceId: params.get('invoiceId'),
+                date: params.get('date'),
+                time: params.get('time'),
+                customer: params.get('customer'),
+                status: params.get('status'),
+                paidAmount: params.get('paidAmount'),
+                phoneNumber: params.get('phoneNumber'),
+                sitNumber: params.get('sitNumber'),
+                goTo: params.get('goTo'),
+                fromTo: params.get('fromTo')
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = getQueryParams();
+            document.getElementById('invoiceId').innerText = params.invoiceId;
+            document.getElementById('date').innerText = params.date;
+            document.getElementById('time').innerText = params.time;
+            document.getElementById('customer').innerText = params.customer;
+            document.getElementById('status').innerText = params.status;
+            document.getElementById('paidAmount').innerText = params.paidAmount;
+            document.getElementById('phoneNumber').innerText = params.phoneNumber;
+            document.getElementById('sitNumber').innerText = params.sitNumber;
+            document.getElementById('goTo').innerText = params.goTo;
+            document.getElementById('fromTo').innerText = params.fromTo;
+        });
+    </script>
+</body>
+</html>

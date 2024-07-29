@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Details</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            margin-top: 20px;
+        }
+        .details-table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sale Details</h2>
+        <table class="table table-bordered details-table">
+            <tbody>
+                <tr>
+                    <th>Invoice ID</th>
+                    <td id="invoiceId"></td>
+                </tr>
+                <tr>
+                    <th>Date</th>
+                    <td id="date"></td>
+                </tr>
+                <tr>
+                    <th>Time</th>
+                    <td id="time"></td>
+                </tr>
+                <tr>
+                    <th>Customer</th>
+                    <td id="customer"></td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td id="status"></td>
+                </tr>
+                <tr>
+                    <th>Paid Amount</th>
+                    <td id="paidAmount"></td>
+                </tr>
+                <tr>
+                    <th>Phone Number</th>
+                    <td id="phoneNumber"></td>
+                </tr>
+                <tr>
+                    <th>Sit Number</th>
+                    <td id="sitNumber"></td>
+                </tr>
+                <tr>
+                    <th>Go to</th>
+                    <td id="goTo"></td>
+                </tr>
+                <tr>
+                    <th>From to</th>
+                    <td id="fromTo"></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-primary" onclick="window.history.back()">Back</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = { 
+                    apiKey: "AIzaSyDNmEa2hy8zKxk_pDHoZBZ00iL2TDc64TQ", 
+                    authDomain: "travel-72e79.firebaseapp.com", 
+                    projectId: "travel-72e79", 
+                    storageBucket: "travel-72e79.appspot.com", 
+                    messagingSenderId: "3188908351", 
+                    appId: "1:3188908351:web:bf6e59231e26209735338a" 
+                };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Get Sale ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const saleId = urlParams.get('saleId');
+
+        // Load Sale Details
+        async function loadSaleDetails() {
+            try {
+                const doc = await db.collection('sales').doc(saleId).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('invoiceId').innerText = data.invoiceId;
+                    document.getElementById('date').innerText = data.date;
+                    document.getElementById('time').innerText = data.time;
+                    document.getElementById('customer').innerText = data.customer;
+                    document.getElementById('status').innerText = data.status;
+                    document.getElementById('paidAmount').innerText = data.paidAmount;
+                    document.getElementById('phoneNumber').innerText = data.phoneNumber;
+                    document.getElementById('sitNumber').innerText = data.sitNumber;
+                    document.getElementById('goTo').innerText = data.goTo;
+                    document.getElementById('fromTo').innerText = data.fromTo;
+                } else {
+                    alert('No such sale!');
+                }
+            } catch (error) {
+                alert('Error fetching sale details: ' + error.message);
+            }
+        }
+
+        // Initial Load
+        loadSaleDetails();
+    </script>
+</body>
+</html>
